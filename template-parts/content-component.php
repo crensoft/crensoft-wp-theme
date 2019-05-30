@@ -6,6 +6,8 @@
  *
  * @package Crensoft
  */
+require dirname(__DIR__) . '/vendor/autoload.php';
+
 global $meta;
 $postContent = get_the_content();
 
@@ -13,7 +15,8 @@ $postContent = get_the_content();
 function cssData($htmlString) {
   $doc = new DOMDocument();
   $doc->loadHTML($htmlString);
-  return $doc->documentElement->firstChild->firstChild->getAttribute('data-css');
+  $parser = \WyriHaximus\HtmlCompress\Factory::construct();
+  return $parser->compress($doc->documentElement->firstChild->firstChild->getAttribute('data-css'));
 }
 function logoUrl() {
   $custom_logo_id = get_theme_mod( 'custom_logo' );
@@ -22,7 +25,8 @@ function logoUrl() {
 }
 function interpolateData($htmlString) {
   $doc = new DOMDocument();
-  $doc->loadHTML($htmlString);
+  // handle utf-8 encoding correctly
+  $doc->loadHTML('<?xml encoding="utf-8" ?>' . $htmlString);
   $rootDiv = $doc->documentElement->firstChild->firstChild;
   $rootDiv->removeAttribute('data-css');
   return str_replace('%wp:logo%', logoUrl(), $doc->saveHTML($rootDiv));
